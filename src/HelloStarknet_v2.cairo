@@ -13,6 +13,8 @@ pub trait IHelloStarknet_v2<TContractState> {
     fn add_new_owner(ref self: TContractState, new_owner: ContractAddress);
 
     fn increase_balance_by_one(ref self: TContractState);
+
+    fn get_current_owner(self: @TContractState) -> ContractAddress;
 }
 
 /// Simple contract for managing balance.
@@ -43,16 +45,20 @@ mod HelloStarknet_v2 {
         }
 
         fn add_new_owner(ref self: ContractState, new_owner: ContractAddress) {
+            // validation to ensure only owner can invoke this function
             self.only_owner();
-
-            // assert new owner is not the current owner
-            self.only_owner();
+            // assert that new owner is not the current owner
+            assert(self.get_current_owner() != new_owner, 'same Owner');
             self.owner.write(new_owner);
         }
 
         fn increase_balance_by_one(ref self: ContractState) {
             let current_balance = self.get_balance();
             self.balance.write(current_balance + 1);
+        }
+
+        fn get_current_owner(self: @ContractState) -> ContractAddress {
+            self.owner.read()
         }
     }
 
